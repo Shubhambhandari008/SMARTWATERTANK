@@ -1,0 +1,102 @@
+const int trigPin = 5;
+const int echoPin = 4;
+#include <SoftwareSerial.h>
+SoftwareSerial gsm(2,3);   //Tx,Rx
+
+char phone_no[] = "9156562746";
+
+
+void setup() 
+{
+  Serial.begin(9600);
+  gsm.begin(9600);
+
+  pinMode(10,OUTPUT);
+  pinMode(11,OUTPUT);
+  
+  Serial.begin(9600);
+  pinMode(trigPin,OUTPUT);
+  pinMode(echoPin,INPUT);
+}
+
+void loop()
+{
+  
+  long duration, cm;
+
+  digitalWrite(trigPin, LOW);
+  digitalWrite(trigPin, HIGH);   
+  duration = pulseIn(echoPin, HIGH);
+  cm=(duration/29)/2;
+ Serial.print("Distance is:");
+  Serial.print(cm);
+ Serial.println("cm");
+  Serial.println();
+delay(1000);
+if(cm==1)
+{
+  
+  digitalWrite(10,LOW);  //motor off
+  digitalWrite(11,LOW);
+  Serial.println("Water Tank is Full");
+  delay(300);
+
+  Serial.println("AT+CMGF=1");
+  gsm.println("AT+CMGF=1");
+  delay(2000);
+  Serial.print("AT+CMGS=\"");
+  gsm.print("AT+CMGS=\"");
+  Serial.print(phone_no);
+  gsm.print(phone_no);
+  Serial.write(0x22);
+  gsm.write(0x22);
+  Serial.write(0x0D);
+  gsm.write(0x0D);// hex equivalent of Carraige return
+  Serial.write(0x0A);
+  gsm.write(0x0A);// hex equivalent of newline
+  delay(2000);
+  Serial.print("Water tank is full!");
+  gsm.print("Water Tank is Full!");
+  delay(500);
+  Serial.println (char(26));//the ASCII code of the ctrl+z is 26
+  gsm.println (char(26));
+
+delay(2000);
+}
+else if(cm==2)
+{ 
+  Serial.println("Tank is half Filled!");
+  gsm.println("Tank is Half Filled!");
+}  
+
+else if(cm<4)
+{  
+  digitalWrite(10,HIGH);  //motor on
+  digitalWrite(11,LOW);
+  Serial.println("Water Tank is Empty!");
+  delay(300);
+
+  Serial.println("AT+CMGF=1");
+  gsm.println("AT+CMGF=1");
+  delay(2000);
+  Serial.print("AT+CMGS=\"");
+  gsm.print("AT+CMGS=\"");
+  Serial.print(phone_no);
+  gsm.print(phone_no);
+  Serial.write(0x22);
+  gsm.write(0x22);
+  Serial.write(0x0D);
+  gsm.write(0x0D);// hex equivalent of Carraige return
+  Serial.write(0x0A);
+  gsm.write(0x0A);// hex equivalent of newline
+  delay(2000);
+  Serial.print("Water tank is Empty");  
+  gsm.print("Water Tank is Empty!");
+  delay(500);
+  Serial.println (char(26));//the ASCII code of the ctrl+z is 26
+  gsm.println (char(26));
+
+}
+  
+  
+}
